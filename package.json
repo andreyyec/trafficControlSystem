@@ -26,6 +26,6 @@
   },
   "homepage": "https://github.com/andreyyec/trafficControlSystem#readme",
   "devDependencies": {
-    "http-server": "^0.9.0"
+    
   }
 }
