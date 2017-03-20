@@ -26,6 +26,11 @@
   },
   "homepage": "https://github.com/andreyyec/trafficControlSystem#readme",
   "devDependencies": {
-    
+    "forever": "^0.15.3",
+    "gulp": "^3.9.1",
+    "gulp-if": "^2.0.2",
+    "gulp-plumber": "^1.1.0",
+    "gulp-shell": "^0.6.3",
+    "yargs": "^7.0.2"
   }
 }

@@ -10,7 +10,7 @@ gulp.task('server', function(){
 
     if (argv.start !== undefined || argv.stop !== undefined) {
         action = (argv.start !== undefined) ? 'start' : 'stop';
-        parameters = (argv.start !== undefined) ? './ -p 8090 -c-1 -d false -o' : '';
+        parameters = (argv.start !== undefined) ? './Application/public/ -p 8090 -c-1 -d false -o' : '';
         return gulp.src('').pipe(shell('"./node_modules/.bin/forever" '+action+' "./node_modules/http-server/bin/http-server" '+parameters));
     }else{
         console.log('**Invalid action \nPlease use  gulp server (--start\|--stop)');
