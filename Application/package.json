@@ -25,5 +25,7 @@
     "url": "https://github.com/andreyyec/trafficControlSystem/issues"
   },
   "homepage": "https://github.com/andreyyec/trafficControlSystem#readme",
-  "devDependencies": {}
+  "devDependencies": {
+    "express": "^4.15.2"
+  }
 }
