@@ -19,38 +19,40 @@ app.listen(3000, (req, res) => {
 });
 
 app.get('/', (req, res) => {
-	var locals = {
+	res.render('index', {
+		activeTab : 1,
 	    tabTitle: 'Dashboard - TCSb',
 	    mainTitle: 'Dashboard',
 	    subTitle: 'Statistics Overview',
-  	};
-
-  	res.render('index', locals);
+  	});
 
 });
 
 app.get('/charts', (req, res) => {
-    //res.sendFile(__dirname + '/charts.html');
-    
-    var locals = {
+  	res.render('charts', {
+    	activeTab : 2,
 	    tabTitle: 'Charts - TCSb',
 	    mainTitle: 'Charts',
 	    subTitle: '',
-  	};
-
-  	res.render('charts', locals);
+  	});
 });
 
 app.get('/tables', (req, res) => {
-    //res.sendFile(__dirname + '/tables.html');
-
-    var locals = {
+    res.render('tables', {
+    	activeTab : 3,
 	    tabTitle: 'Tables - TCSb',
 	    mainTitle: 'Tables',
 	    subTitle: '',
-  	};
+  	}); 
+});
 
-  	res.render('tables', locals); 
+app.get('/settings', (req, res) => {
+    res.render('settings', {
+    	activeTab : 4,
+	    tabTitle: 'Settings - TCSb',
+	    mainTitle: 'Settings',
+	    subTitle: '',
+  	}); 
 });
 
 app.get('/rest', (req, res) => {
@@ -61,14 +63,10 @@ app.get('/rest', (req, res) => {
 });
 
 app.get('*', function(req, res){
-    res.sendFile(__dirname + '/404.html');
-
-
-   	var locals = {
+   	res.render('404', {
+    	activeTab : 0,
 		tabTitle: 'Not found error - TCSb',
 	 	mainTitle: '',
 		subTitle: '',
-  	};
-
-  	res.render('404', locals);
+  	});
 });
