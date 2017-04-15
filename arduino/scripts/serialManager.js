@@ -1,5 +1,6 @@
 
-const SerialPort = require('serialport');
+const   SerialPort = require('serialport'),
+        MongoClient = require('mongodb').MongoClient;
 
 class SerialManager {
 
@@ -29,9 +30,23 @@ class SerialManager {
         });
     }
 
+    dbConnect() {
+        MongoClient.connect('mongodb://localhost:27017/local', function(err, db) {
+            if (err) {
+                console.log('error');
+                console.error(err);
+            }
+            var collection = db.collection('collectionName');
+            collection.find().toArray(function(err, docs) {
+                console.log('db');
+                console.log(docs);
+            });
+        });
+    }
+
     constructor() {
         console.log('Constructor triggered');
-       this.setup(); 
+        //this.setup(); 
     }
 }
 

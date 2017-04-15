@@ -1,8 +1,8 @@
 {
-  "name": "Serial arduino-node communication service",
+  "name": "traffic_control_system_beta",
   "version": "0.0.1",
-  "description": "Serial communication service",
-  "main": "index.js",
+  "description": "Traffic control system using arduino and NodeJS",
+  "main": "gulpfile.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -26,6 +26,7 @@
   },
   "homepage": "https://github.com/andreyyec/trafficControlSystem#readme",
   "devDependencies": {
+    "mongodb": "^2.2.25",
     "serialport": "^4.0.7"
   }
 }
