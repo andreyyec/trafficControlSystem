@@ -1,21 +1,23 @@
 
 const   SerialPort = require('serialport'),
-        MongoClient = require('mongodb').MongoClient;
+        MongoClient = require('mongodb').MongoClient,
+        Distance = 0.5;
 
 class SerialManager {
 
-    setup(){
+    setup() {
         let that = this;
+        that.recordStack = [];
 
         MongoClient.connect('mongodb://localhost:27017/tcsdb', (err, database) => {
             if (err) {
-                console.log('=> Debug => Database connection error');
+                console.log('=>Debug: Database connection error');
                 return console.log(err);
             }
             that.db = database;
-            that.port = new SerialPort('COM3',{ baudrate: 9600, parser: SerialPort.parsers.readline('\n') }, (err) => {
+            that.port = new SerialPort('/dev/ttyACM0',{ baudrate: 9600, parser: SerialPort.parsers.readline('\n') }, (err) => {
                 if (err) {
-                    console.log('=> Debug => Serial port connection error');
+                    console.log('=>Debug: Serial port connection error');
                     return console.log('Error: ', err.message);
                 }   
                 this.initListeners();
@@ -23,37 +25,125 @@ class SerialManager {
         })
     }
 
-    initListeners(){
-        let that = this;
-        
-        that.port.on('open', function(){
-            console.log('Serial Port Connection established');
-            that.port.on('data', function(data){
-                console.log(data);
-            });
-        });
+    dataHandler(sensor, state) {
+        let that = this,
+            currentTime = new Date();
+
+        switch(sensor) {
+            case '1':
+                if (state === 'active') {
+                    if (that.recordStack.length > 0) {
+                        let obj = that.generateTimeObj(currentTime);
+                        that.recordStack[0].sensor1.active = obj;    
+                    } else {
+                        that.generateRecordObj(currentTime, 1);
+                    }
+                }else {
+                    let obj = that.generateTimeObj(currentTime);
+                    that.recordStack[0].sensor1.inactive = obj;
+                    that.dataSender();
+                }
+            break;
+            case '2':
+                if (state === 'active') {
+                    if (that.recordStack.length > 0) {
+                        let obj = that.generateTimeObj(currentTime);
+                        that.recordStack[0].sensor2.active = obj;    
+                    } else {
+                        that.generateRecordObj(currentTime, 2);
+                    }
+                }else {
+                    let obj = that.generateTimeObj(currentTime);
+                    that.recordStack[0].sensor2.inactive = obj;
+                    that.dataSender();
+                }
+            break;
+            default:
+                console.log('=>Debug: Unhandled sensor');
+            break;
+        }
     }
 
-    // dbConnect() {
-    //     MongoClient.connect('mongodb://localhost:27017/local', function(err, db) {
-    //         if (err) {
-    //             console.log('error');
-    //             console.error(err);
-    //         }
-    //         var collection = db.collection('collectionName');
-    //         collection.find().toArray(function(err, docs) {
-    //             console.log('db');
-    //             console.log(docs);
-    //         });
-    //     });
-    // }
+    dataSender(){
+        let obj = ( this.recordStack.length > 0 ) ? this.recordStack[0] : null;
+        console.log(obj);
 
-    // CRUD EXAMPLES
-    // INSERT
-    //db.records1.insert({'year':'2017', 'month':'01', day:'01', 'time':'12:05:17'});
+        if (obj && obj.sensor1.active.fulldate && obj.sensor1.inactive.fulldate 
+            && obj.sensor2.active.fulldate && obj.sensor2.inactive.fulldate) {
+            console.log('=>Debug: Ready to send to DB');
+            
+
+            let date1 = new Date(obj.sensor1.active.fulldate),
+                date2 = new Date(obj.sensor2.active.fulldate),
+                timeDiff = Math.abs(date1.getTime() - date2.getTime()) / 1000,
+                averageSpeed =  Distance / timeDiff;
+
+            console.log('=>Debug: Results:');
+            console.log('Time: '+timeDiff);
+            console.log('Distance: '+Distance);
+            console.log('Average Speed: '+averageSpeed+'m/s');
+            console.log('===================');
+
+            this.recordStack.pop();
+        }
+    }
+
+    generateTimeObj(cTime){
+        let obj = {
+            fulldate: cTime,
+            hour: cTime.getHours(),
+            minute: cTime.getMinutes(),
+            seconds: cTime.getSeconds()
+        };
+        return obj;
+    }
+
+    generateRecordObj(cTime, sensor) {
+        let obj = this.generateTimeObj(cTime),
+            dbRecord = {
+                year: cTime.getFullYear(),
+                month: cTime.getMonth()+1,
+                day: cTime.getDate(),
+                time: '',
+                averageSpeed: '',
+                sensor1: {
+                    active: {},
+                    inactive: {}
+                },
+                sensor2: {
+                    active: {},
+                    inactive: {}
+                }
+            };
+        if (sensor === 1) {
+            dbRecord.sensor1.active = obj;
+        } else {
+            dbRecord.sensor2.active = obj;
+        }
+        this.recordStack.push(dbRecord);
+    }
+
+    initListeners(){
+        let that = this;
+        console.log('=>Debug: Attaching listeners');
+
+        that.port.on('data', function(data){
+            let patt = new RegExp('=>Debug:'),
+                debug = patt.test(data);
+
+            if (!debug) {
+                let obj = JSON.parse(data);
+                console.log(obj);
+                that.dataHandler(obj.sensor, obj.state);
+            }else{
+                console.log(data);    
+            }
+        });
+        console.log('=>Debug: Done');
+    }
 
     constructor() {
-        console.log('Starting Serial Manager');
+        console.log('=>Debug: Serial Manager started');
         this.setup(); 
     }
 }

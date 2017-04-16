@@ -32,15 +32,13 @@ void setup(){
   digitalWrite(pir_two_Pin, HIGH);
  
   //give the sensor some time to calibrate
-  Serial.print("calibrating sensor ");
+  Serial.println("=>Debug: calibrating sensor");
     for(int i = 0; i < calibrationTime; i++){
-      Serial.print(".");
       delay(1000);
       }
-    Serial.println(" done");
-    Serial.println("SENSOR ACTIVE");
+    Serial.println("=>Debug: done");
+    Serial.println("=>Debug: Sensors Active");
     delay(50);
-    Serial.println("Initializing debugging");
   }
  
 ////////////////////////////
@@ -50,32 +48,27 @@ void loop(){
     
     int pir1Test = (digitalRead(pir_one_Pin) == HIGH) ? 1 : 0;
     int pir2Test = (digitalRead(pir_two_Pin) == HIGH) ? 1 : 0;
-    
-    //Serial.println("PIR 1 State: " + pir1Test);
-    //Serial.println("PIR 2 State: " + pir2Test);
-
-
                                                                         //Activate led when sensor1 detects an object
     if(digitalRead(pir_one_Pin) == LOW && !led1State){
-        Serial.println("{Sensor 1:ACTIVE}");
+        Serial.println("{\"sensor\":\"1\",\"state\":\"active\"}");
         led1State = true;
         digitalWrite(led_one_Pin, HIGH);   //led1 turns on
         //delay(100);
     }else if(digitalRead(pir_one_Pin) == HIGH && led1State){
-        Serial.println("{Sensor 1:INACTIVE}");
+        Serial.println("{\"sensor\":\"1\",\"state\":\"inactive\"}");
         led1State = false;                
         digitalWrite(led_one_Pin, LOW); //led1 turns off
     }
                                                                         //Activate led when sensor2 detects an object
     if(digitalRead(pir_two_Pin) == LOW && !led2State){
-        Serial.println("{Sensor 2:ACTIVE}");
+        Serial.println("{\"sensor\":\"2\",\"state\":\"active\"}");
         led2State = true;
         digitalWrite(led_two_Pin, HIGH);   //led2 turns on
         //delay(100);
     }else if(digitalRead(pir_two_Pin) == HIGH && led2State){
-        Serial.println("{Sensor 2:INACTIVE}");
+        Serial.println("{\"sensor\":\"2\",\"state\":\"inactive\"}");
         led2State = false;          
         digitalWrite(led_two_Pin, LOW);   //led2 turns off
     }
-    delay(100);
+    delay(50);
 }
