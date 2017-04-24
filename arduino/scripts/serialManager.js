@@ -1,7 +1,7 @@
 
 const   SerialPort = require('serialport'),
         MongoClient = require('mongodb').MongoClient,
-        Distance = 0.5;
+        Distance = 0.15;
 
 class SerialManager {
 
@@ -15,6 +15,7 @@ class SerialManager {
                 return console.log(err);
             }
             that.db = database;
+            
             that.port = new SerialPort('/dev/ttyACM0',{ baudrate: 9600, parser: SerialPort.parsers.readline('\n') }, (err) => {
                 if (err) {
                     console.log('=>Debug: Serial port connection error');
@@ -22,7 +23,7 @@ class SerialManager {
                 }   
                 this.initListeners();
             });
-        })
+        });
     }
 
     dataHandler(sensor, state) {
@@ -34,7 +35,7 @@ class SerialManager {
                 if (state === 'active') {
                     if (that.recordStack.length > 0) {
                         let obj = that.generateTimeObj(currentTime);
-                        that.recordStack[0].sensor1.active = obj;    
+                        that.recordStack[0].sensor1.active = obj;
                     } else {
                         that.generateRecordObj(currentTime, 1);
                     }
@@ -65,24 +66,33 @@ class SerialManager {
     }
 
     dataSender(){
-        let obj = ( this.recordStack.length > 0 ) ? this.recordStack[0] : null;
-        console.log(obj);
+        let that = this,
+            obj = ( this.recordStack.length > 0 ) ? this.recordStack[0] : null;
 
         if (obj && obj.sensor1.active.fulldate && obj.sensor1.inactive.fulldate 
             && obj.sensor2.active.fulldate && obj.sensor2.inactive.fulldate) {
             console.log('=>Debug: Ready to send to DB');
-            
 
             let date1 = new Date(obj.sensor1.active.fulldate),
                 date2 = new Date(obj.sensor2.active.fulldate),
                 timeDiff = Math.abs(date1.getTime() - date2.getTime()) / 1000,
                 averageSpeed =  Distance / timeDiff;
 
+
+            obj.time = timeDiff;
+            obj.averageSpeed = averageSpeed;
+
+            //Debug Block
             console.log('=>Debug: Results:');
             console.log('Time: '+timeDiff);
             console.log('Distance: '+Distance);
             console.log('Average Speed: '+averageSpeed+'m/s');
-            console.log('===================');
+            // console.log('===================');
+            // console.log('=>Debug: Object:');
+            // console.log(obj);
+            // console.log('=>Debug: ./Object:');
+
+            this.saveToDB(obj);
 
             this.recordStack.pop();
         }
@@ -136,15 +146,30 @@ class SerialManager {
                 console.log(obj);
                 that.dataHandler(obj.sensor, obj.state);
             }else{
-                console.log(data);    
+                console.log(data);
             }
         });
         console.log('=>Debug: Done');
     }
 
+    saveToDB(object){
+        console.log('=>Debug: Saving record to the database');
+        let that = this,
+            collection = that.db.collection('trafficRecords');
+
+        collection.insertOne(object,function(err, r) {
+            if (err === null) {
+                console.log('=>Debug: Record saved');
+            }else{
+                console.log('=>Debug: Error while trying to save record to Database');
+                console.log('=>Debug: Error:' + err);
+            }
+        });
+    }
+
     constructor() {
         console.log('=>Debug: Serial Manager started');
-        this.setup(); 
+        this.setup();
     }
 }
 

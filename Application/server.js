@@ -19,12 +19,17 @@ app.listen(3000, (req, res) => {
 });
 
 app.get('/', (req, res) => {
-	res.render('index', {
-		activeTab : 1,
-	    tabTitle: 'Dashboard - TCSb',
-	    mainTitle: 'Dashboard',
-	    subTitle: 'Statistics Overview',
-  	});
+	let records = dbManager.getTrafficRecordsCount();
+    
+    records.then(function(data){
+        res.render('index', {
+			activeTab : 1,
+	    	tabTitle: 'Dashboard - TCSb',
+	    	mainTitle: 'Dashboard',
+	    	subTitle: 'Statistics Overview',
+	    	records: data
+  		});
+    });
 
 });
 
@@ -55,12 +60,9 @@ app.get('/settings', (req, res) => {
   	}); 
 });
 
-app.get('/rest', (req, res) => {
-    //console.log(dbManager.findAllCollectionRecords('records1'));
-    dbManager.findAllCollectionRecords('records1').then( function(results) {
-    	console.log(results);
-    });
-});
+// app.get('/rest', (req, res) => {
+    
+// });
 
 app.get('*', function(req, res){
    	res.render('404', {

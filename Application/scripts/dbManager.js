@@ -12,20 +12,29 @@ class dbManager {
                 return console.log(err);
             }
             that.db = database;
-            // database.collection('records1').find().toArray(function(err, results) {
-            //   console.log(results)
-            //   // send HTML file populated with quotes here
-            // })
         });
+    }
+
+    getAllTrafficRecords() {
+        let collection = this.db.collection('trafficRecords');
+        // collection.find().forEach(function(record){ 
+        //     console.log(record._id);
+        // });
+
+        collection.find().toArray(function(err, results) {
+            console.log(results);
+            // send HTML file populated with quotes here
+        })
+    }
+
+    getTrafficRecordsCount() {
+        let collection = this.db.collection('trafficRecords');
+        return collection.count();
     }
 
     findAllCollectionRecords(collection) {
         return this.db.collection(collection).find().toArray();
     }
-
-    // CRUD EXAMPLES
-    // INSERT
-    //db.records1.insert({'year':'2017', 'month':'01', day:'01', 'time':'12:05:17'});
 
     constructor() {
         console.log('Starting Database Manager');
